@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>S3Keys 配网</title>
+<style>
+:root { --bg:#0f1419; --card:#1a2330; --line:#2c3a4d; --txt:#eef3f8; --dim:#8b9bb0; --acc:#3d8bfd; --ok:#3dd68c; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:28rem;margin:0 auto;padding:1.25rem}
+h1{font-size:1.25rem;font-weight:650;margin:0 0 .25rem}
+.sub{color:var(--dim);font-size:.9rem;margin:0 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;border-bottom:1px solid var(--line)}
+.hd b{font-size:.85rem}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:.55rem .9rem}
+.btn:disabled{opacity:.5}
+.btn-g{background:transparent;color:var(--acc);border:1px solid var(--acc);border-radius:8px;padding:.35rem .7rem;font-size:.85rem}
+.list{max-height:16rem;overflow:auto}
+.row{display:flex;gap:.6rem;align-items:center;width:100%;text-align:left;background:transparent;color:inherit;border:0;border-bottom:1px solid var(--line);padding:.75rem 1rem}
+.row:last-child{border-bottom:0}
+.row.on{background:#24344a}
+.ssid{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.meta{color:var(--dim);font-size:.75rem;white-space:nowrap}
+.bars{width:16px;height:12px;position:relative}
+.bars i{position:absolute;bottom:0;width:3px;background:#4a5d73;border-radius:1px}
+.bars i:nth-child(1){left:0;height:4px}
+.bars i:nth-child(2){left:4px;height:7px}
+.bars i:nth-child(3){left:8px;height:10px}
+.bars i:nth-child(4){left:12px;height:12px}
+.bars.s1 i:nth-child(1),.bars.s2 i:nth-child(-n+2),.bars.s3 i:nth-child(-n+3),.bars.s4 i{background:var(--ok)}
+.form{padding:1rem}
+label{display:block;color:var(--dim);font-size:.8rem;margin:.5rem 0 .25rem}
+input{width:100%;padding:.65rem .7rem;border-radius:8px;border:1px solid var(--line);background:#121920;color:var(--txt)}
+.hint{color:var(--dim);font-size:.8rem;margin:.75rem 0 0}
+.okbox{display:none;padding:1rem;text-align:center}
+.okbox .ip{font-size:1.4rem;font-weight:700;letter-spacing:.02em;margin:.4rem 0}
+.err{color:#ff8b8b;font-size:.85rem;min-height:1.2em;margin:.4rem 0 0}
+details{margin-top:.6rem;color:var(--dim);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>S3Keys</h1>
+  <p class="sub">选择家里的 WiFi。连接成功后看本页或琴屏幕上的 IP，手机改连该网络，用 IP:2333 调试。</p>
+  <div class="card" id="card">
+    <div class="hd"><b>附近网络</b><button class="btn-g" id="ref" type="button">刷新</button></div>
+    <div class="list" id="list"><div class="row"><span class="dim">正在扫描…</span></div></div>
+    <form class="form" id="f">
+      <label>已选网络</label>
+      <input name="ssid" id="ssid" readonly placeholder="请在上方点选">
+      <label>密码（开放网络可留空）</label>
+      <input name="pass" id="pass" type="password" autocomplete="current-password" placeholder="WiFi 密码">
+      <p class="err" id="err"></p>
+      <button class="btn" id="go" type="submit" style="width:100%;margin-top:.6rem">连接</button>
+      <details>
+        <summary>列表里没有？手动输入名称</summary>
+        <p class="hint">名称必须与路由器上完全一致（含空格、大小写）。</p>
+        <input id="manual" placeholder="手动输入 SSID" style="margin-top:.4rem">
+      </details>
+    </form>
+  </div>
+  <div class="card okbox" id="ok">
+    <p>已连上家里的网络</p>
+    <div class="ip" id="ip">—</div>
+    <p class="hint">请把手机切回这个 WiFi，调试软件填写该 IP，端口 2333。</p>
+  </div>
+</div>
+<script>
+const list=document.getElementById('list'), ssid=document.getElementById('ssid'), pass=document.getElementById('pass');
+const err=document.getElementById('err'), go=document.getElementById('go');
+function bars(rssi){
+  const n=rssi>=-55?4:rssi>=-65?3:rssi>=-75?2:1;
+  return '<span class="bars s'+n+'"><i></i><i></i><i></i><i></i></span>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function scan(){
+  list.innerHTML='<div class="row"><span class="dim">正在扫描…</span></div>';
+  try{
+    const r=await fetch('/scan'); const a=await r.json();
+    if(!a.length){list.innerHTML='<div class="row">没扫到网络，点刷新重试</div>';return}
+    list.innerHTML=a.map(x=>'<button type="button" class="row" data-ssid="'+esc(x.ssid)+'" data-lock="'+x.lock+'">'+
+      bars(x.rssi)+'<span class="ssid">'+esc(x.ssid)+'</span><span class="meta">'+(x.lock?'加密':'开放')+'</span></button>').join('');
+    list.querySelectorAll('.row').forEach(b=>b.onclick=()=>{
+      list.querySelectorAll('.row').forEach(z=>z.classList.remove('on'));
+      b.classList.add('on');
+      ssid.value=b.dataset.ssid;
+      ssid.readOnly=true;
+      err.textContent='';
+      if(b.dataset.lock==='1') pass.focus(); else pass.value='';
+    });
+  }catch(e){list.innerHTML='<div class="row">扫描失败，请刷新</div>'}
+}
+document.getElementById('ref').onclick=scan;
+document.getElementById('manual').onchange=e=>{
+  if(e.target.value.trim()){ssid.readOnly=false;ssid.value=e.target.value.trim()}
+};
+document.getElementById('f').onsubmit=async ev=>{
+  ev.preventDefault();
+  const s=ssid.value.trim();
+  if(!s){err.textContent='请先选择或输入 WiFi 名称';return}
+  go.disabled=true; err.textContent='正在连接…';
+  try{
+    const body=new URLSearchParams({ssid:s,pass:pass.value});
+    const r=await fetch('/save',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+    if(!r.ok) throw 0;
+    err.textContent='已提交，等待分配 IP…';
+    for(let i=0;i<30;i++){
+      await new Promise(r=>setTimeout(r,1000));
+      const st=await (await fetch('/status')).json();
+      if(st.ok&&st.ip&&st.ip!=='0.0.0.0'&&st.ip!=='192.168.4.1'){
+        document.getElementById('card').style.display='none';
+        document.getElementById('ok').style.display='block';
+        document.getElementById('ip').textContent=st.ip;
+        return;
+      }
+    }
+    err.textContent='还没拿到 IP。可看琴屏幕，或检查密码后重试。';
+  }catch(e){err.textContent='提交失败，请重试'}
+  go.disabled=false;
+};
+scan();
+</script>
+</body>
+</html>

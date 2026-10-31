@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="msc_seed_corpus">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/managed_components/espressif__tinyusb/test/fuzz/device/msc/msc_seed_corpus.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

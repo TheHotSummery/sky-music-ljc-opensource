@@ -1,0 +1,15 @@
+SKY-music V2 — 分项许可（Summary）
+
+- 硬件设计文件（原理图 / PCB / Gerber / 结构）：CERN-OHL-P-2.0
+  全文见 LICENSES/CERN-OHL-P-2.0.txt（发布时请放入官方文本）
+- 本仓库自研固件与脚本（ESP32 / CH32 User 代码、烧录脚本）：MIT
+  全文见 LICENSES/MIT.txt
+- 文档：CC BY 4.0
+  全文见 LICENSES/CC-BY-4.0.txt
+
+第三方资源（钢琴采样等）不适用上述协议，见 NOTICE。
+
+手机 App 不在本开源包范围内。
+
+CH32 工程内 Core / Peripheral / Startup / Debug / Ld 来自 WCH 官方 EVT，
+遵循沁恒原厂许可；再分发时请保留原厂版权声明。

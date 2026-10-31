@@ -1,0 +1,6 @@
+# 当前开发默认 = N16R8（DevKit 16MB）。量产 N8 用 partitions_n8r8.csv + sdkconfig.n8r8
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x6000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, 0x10000, 0x300000,
+assets,   data, fat,     0x310000,0x400000,

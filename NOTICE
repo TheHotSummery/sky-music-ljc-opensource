@@ -1,0 +1,31 @@
+SKY-music V2 — third-party notices
+=================================
+
+1) Factory piano samples (assets/factory/piano/*.wav)
+   - Derived from publicly available piano MP3 banks used with Tone.js-style
+     instruments (white keys C4–C6), converted to 22050 Hz mono 16-bit PCM WAV
+     and trimmed to ~2.5 s with fade-out for embedded use.
+   - Upstream packs commonly include Salamander Grand Piano lineage and/or
+     nbrosowsky/tonejs-instruments piano samples.
+   - Typical upstream license: Creative Commons Attribution 3.0 (CC BY 3.0).
+   - Credit original sample authors as required (e.g. Alexander Holm /
+     Salamander Grand Piano V3 where applicable).
+   - Do NOT relicense these WAV files as MIT.
+
+2) Demo score (assets/factory/puzi/)
+   - Filename may be ASCII for FAT tooling; display title is inside JSON "name".
+   - Song rights remain with original composers / arrangers / transcribers.
+   - This package ships the file for device demo only; redistribute with care.
+
+3) WCH CH32V003 EVT (Core / Peripheral / Startup / Debug / Ld)
+   - Copyright Nanjing Qinheng Microelectronics Co., Ltd. (WCH).
+   - Bundled so the keyboard project opens without an external EVT tree.
+   - Follow WCH redistribution terms; keep vendor headers/copyright.
+
+4) Espressif ESP-IDF and managed components
+   - Pulled at build time; each component has its own license
+     (Apache-2.0 and others). See managed_components after idf.py build.
+
+5) Game compatibility note
+   - "Sky" 15-key layout compatibility is a community use case description.
+   - This project is not affiliated with that game's publisher.

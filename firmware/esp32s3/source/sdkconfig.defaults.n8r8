@@ -1,0 +1,5 @@
+# Overlay for ESP32-S3-WROOM-1-N8R8 (8MB flash, 8MB octal PSRAM)
+# idf.py -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.n8r8" build
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-8mb.csv"
